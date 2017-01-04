@@ -11,9 +11,25 @@
 
 define('BEHAT_BIN_PATH',     __FILE__);
 
-if (is_file($autoload = getcwd() . '/vendor/autoload.php')) {
-    require $autoload;
+foreach (array(__DIR__ . '/../../autoload.php', __DIR__ . '/../vendor/autoload.php', __DIR__ . '/vendor/autoload.php') as $file) {
+    if (file_exists($file)) {
+        define('BEHAT_COMPOSER_AUTOLOAD', $file);
+        break;
+    }
 }
+
+unset($file);
+
+if (!defined('BEHAT_COMPOSER_AUTOLOAD')) {
+    fwrite(STDERR,
+        'You need to set up the project dependencies using Composer:' . PHP_EOL . PHP_EOL .
+        '    composer install' . PHP_EOL . PHP_EOL .
+        'You can learn all about Composer on https://getcomposer.org/.' . PHP_EOL
+    );
+    die(1);
+}
+
+require BEHAT_COMPOSER_AUTOLOAD;
 
 if (!class_exists('Behat\Behat\ApplicationFactory', true)) {
     if (is_file($autoload = __DIR__ . '/../vendor/autoload.php')) {
